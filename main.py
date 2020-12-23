@@ -56,7 +56,7 @@ def solve_model(prob, A_matr):
 
     for line in range(sum_dim):
         prob += A_matr[line][0] * x + \
-                pulp.lpSum([A_matr[line][i + j*ent_dim + 1] * x_matr[i, j] for i in range(ent_dim) for j in range(prod_dim)]) \
+                pulp.lpSum([A_matr[line][j + i*ent_dim + 1] * x_matr[i, j] for i in range(prod_dim) for j in range(ent_dim)]) \
                 <= b[line], "c" + str(line + 1)
 
     prob.solve()
@@ -72,7 +72,7 @@ def print_results(prob):
 
 x = LpVariable("X", 0, None, 'Integer')
 x_matr = pulp.LpVariable.dicts("x_matr",
-                               ((i, j) for i in range(ent_dim) for j in range(prod_dim)),
+                               ((i, j) for i in range(prod_dim) for j in range(ent_dim)),
                                lowBound=0,
                                cat='Integer')
 
