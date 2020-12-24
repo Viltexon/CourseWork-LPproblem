@@ -3,13 +3,18 @@ from pulp import *
 from pandas import Series
 import matplotlib.pyplot as plt
 
+# productivity of each factory for each type of parts
 A = [[300., 200., 50., 300., 600.],
      [60., 100., 35, 280., 400.],
      [100., 150., 200., 2.5, 350]]
+# factories of each type
 ent = [8., 4., 70., 10., 4.]
+# parts of each type in the product
 prod = [1., 4., 1.]
 
+# types of factories
 ent_dim = len(ent)
+# types of parts
 prod_dim = len(prod)
 
 sum_dim = ent_dim + prod_dim
@@ -38,11 +43,6 @@ def form_limits(new_alpha_val):
     return a_new
 
 
-c = []
-for i in range(mul_dim):
-    c.append(0.0)
-c[0] = 1.0
-
 b = []
 for i in range(prod_dim):
     b.append(0.0)
@@ -59,7 +59,7 @@ def solve_model(prob, A_matr):
                 pulp.lpSum([A_matr[line][j + i*ent_dim + 1] * x_matr[i, j] for i in range(prod_dim) for j in range(ent_dim)]) \
                 <= b[line], "c" + str(line + 1)
 
-    prob.solve()
+    prob.solve(PULP_CBC_CMD(msg=False))
 
 
 def print_results(prob):
@@ -76,22 +76,25 @@ x_matr = pulp.LpVariable.dicts("x_matr",
                                lowBound=0,
                                cat='Integer')
 
-# opt/pess: 1 +/- alpha_supp(alpha)
 
-# A_matr = form_limits(1)
-# problem = LpProblem("problem", LpMaximize)
-# solve_model(problem, A_matr)
-# print_results(problem)
-#
-# A_matr = form_limits(1 + alpha_supp(alpha))
-# prob_optimist = LpProblem("prob_optimist", LpMaximize)
-# solve_model(prob_optimist, A_matr)
-# print_results(prob_optimist)
-#
-# A_matr = form_limits(1 - alpha_supp(alpha))
-# prob_pessimist = LpProblem("prob_pessimist", LpMaximize)
-# solve_model(prob_pessimist, A_matr)
-# print_results(prob_pessimist)
+print("General Problem:")
+A_matr = form_limits(1)
+problem = LpProblem("problem", LpMaximize)
+solve_model(problem, A_matr)
+print_results(problem)
+
+print("Optimistic Solution(alpha = 0.8):")
+A_matr = form_limits(1 + alpha_supp(alpha))
+prob_optimist = LpProblem("prob_optimist", LpMaximize)
+solve_model(prob_optimist, A_matr)
+print_results(prob_optimist)
+
+print("Pessimistic Solution(alpha = 0.8):")
+A_matr = form_limits(1 - alpha_supp(alpha))
+prob_pessimist = LpProblem("prob_pessimist", LpMaximize)
+solve_model(prob_pessimist, A_matr)
+print_results(prob_pessimist)
+
 
 alpha_test_val = [x/10 for x in range(1, 11)]
 alpha_test = [str(alph) for alph in alpha_test_val]
@@ -117,4 +120,5 @@ ser1 = Series(pes, index=alpha_test, name="pessimist")
 ser2 = Series(opt, index=alpha_test, name="optimist")
 ser1.plot()
 ser2.plot()
+plt.legend()
 plt.show()
