@@ -63,7 +63,7 @@ def solve_model(prob, A_matr):
 
 
 def print_results(prob):
-    print("Status:", LpStatus[prob.status])
+    # print("Status:", LpStatus[prob.status])
     for v in prob.variables():
         print(v.name, "=", v.varValue)
 
@@ -77,26 +77,27 @@ x_matr = pulp.LpVariable.dicts("x_matr",
                                cat='Integer')
 
 
-print("General Problem:")
+print("\nGeneral Problem:")
 A_matr = form_limits(1)
 problem = LpProblem("problem", LpMaximize)
 solve_model(problem, A_matr)
 print_results(problem)
 
-print("Optimistic Solution(alpha = 0.8):")
+print("\nOptimistic Solution(alpha = ", alpha, "):")
 A_matr = form_limits(1 + alpha_supp(alpha))
 prob_optimist = LpProblem("prob_optimist", LpMaximize)
 solve_model(prob_optimist, A_matr)
 print_results(prob_optimist)
 
-print("Pessimistic Solution(alpha = 0.8):")
+print("\nPessimistic Solution(alpha = ", alpha, "):")
 A_matr = form_limits(1 - alpha_supp(alpha))
 prob_pessimist = LpProblem("prob_pessimist", LpMaximize)
 solve_model(prob_pessimist, A_matr)
 print_results(prob_pessimist)
 
 
-alpha_test_val = [x/10 for x in range(1, 11)]
+alpha_range = 10
+alpha_test_val = [x/alpha_range for x in range(1, alpha_range+1)]
 alpha_test = [str(alph) for alph in alpha_test_val]
 
 opt = []
